@@ -1,0 +1,33 @@
+name: PR Vulnerable Workflow
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  vulnerable-pr-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código enviado por el Pull Request
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Ejecutar scanner del proyecto
+        run: |
+          echo "[INFO] Ejecutando scanner desde workflow vulnerable"
+          python app/scanner.py README.md
+
+      - name: Verificar existencia de secret falso
+        env:
+          LAB_FAKE_TOKEN: ${{ secrets.LAB_FAKE_TOKEN }}
+        run: |
+          echo "[INFO] Verificando si existe LAB_FAKE_TOKEN"
+          if [ -n "$LAB_FAKE_TOKEN" ]; then
+            echo "[RIESGO] El workflow tiene acceso a un secret."
+            echo "[INFO] Por seguridad, el valor real no será mostrado."
+          else
+            echo "[OK] No se encontró secret disponible."
+          fi

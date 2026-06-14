@@ -1,0 +1,32 @@
+name: Release Vulnerable Workflow
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Construir artefacto
+        run: |
+          chmod +x scripts/build_artifact.sh
+          ./scripts/build_artifact.sh
+
+      - name: Mostrar hash del artefacto
+        run: |
+          sha256sum releases/trivy-demo-v1.txt
+
+      - name: Simular publicación de artefacto
+        run: |
+          echo "[INFO] Simulando publicación de artefacto..."
+          echo "[RIESGO] Este job tiene permissions: contents: write"
