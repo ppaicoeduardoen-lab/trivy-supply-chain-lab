@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   build-release:
@@ -16,17 +17,22 @@ jobs:
     steps:
       - name: Descargar código
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preparar scripts
+        run: chmod +x scripts/*.sh
 
       - name: Construir artefacto
-        run: |
-          chmod +x scripts/build_artifact.sh
-          ./scripts/build_artifact.sh
+        run: ./scripts/build_artifact.sh "${GITHUB_REF_NAME:-v1.0.0}"
 
-      - name: Mostrar hash del artefacto
-        run: |
-          sha256sum releases/trivy-demo-v1.txt
+      - name: Publicar en registry simulado
+        run: ./scripts/publish_to_registry.sh "${GITHUB_REF_NAME:-v1.0.0}"
 
-      - name: Simular publicación de artefacto
+      - name: Mostrar hashes
+        run: sha256sum dist/* registry/docker/* registry/npm/* registry/pypi/*
+
+      - name: Advertencia de permisos
         run: |
-          echo "[INFO] Simulando publicación de artefacto..."
-          echo "[RIESGO] Este job tiene permissions: contents: write"
+          echo "[RIESGO] Este workflow usa contents: write y packages: write."
+          echo "[RIESGO] En un compromiso real, estos permisos deben estar separados y protegidos."

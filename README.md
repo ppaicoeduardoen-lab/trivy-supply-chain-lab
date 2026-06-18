@@ -1,21 +1,32 @@
 # Trivy Supply Chain Lab
 
-Este repositorio simula un entorno vulnerable de cadena de suministro de software basado en GitHub Actions.
-
-## Contexto
-
-El laboratorio está inspirado en un escenario de compromiso CI/CD, donde una configuración insegura puede permitir ejecución de código no confiable, exposición de secretos y manipulación de artefactos.
+Laboratorio académico basado en un escenario de cadena de suministro tipo Trivy.
 
 ## Objetivo
 
-Simular un entorno vulnerable para luego detectar y mitigar riesgos desde Kali Linux.
+Simular un entorno vulnerable de CI/CD para demostrar:
 
-## Datos simulados
+- Workflow Injection.
+- Uso inseguro de `pull_request_target`.
+- Secrets falsos en GitHub Actions.
+- Permisos excesivos del `GITHUB_TOKEN`.
+- Registry vulnerable.
+- Artefactos sin firma.
+- Consumo inseguro desde un cliente tipo LiteLLM.
+- Mitigación con Cosign, OIDC y mínimo privilegio.
 
-Este valor es falso y solo sirve para pruebas académicas:
+## Herramientas
 
-FAKE_API_KEY=demo_token_no_real_123456
+- Kali Linux
+- Nmap
+- Nessus
+- Acunetix
+- Shodan
+- GitHub Actions
+- Docker
+- Cosign
+- Trivy
 
-## Advertencia
+## Restricciones éticas
 
-Este repositorio es únicamente para laboratorio ético. No contiene secretos reales ni tokens válidos.
+No se usan tokens reales, no se ataca infraestructura externa y no se publica malware.

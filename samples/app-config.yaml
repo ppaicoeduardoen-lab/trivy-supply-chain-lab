@@ -1,0 +1,8 @@
+app:
+  name: trivy-supply-chain-lab
+  environment: lab
+  debug: true
+
+security:
+  signed_artifacts_required: false
+  allow_unverified_downloads: true

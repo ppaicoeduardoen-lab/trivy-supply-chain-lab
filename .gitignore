@@ -1,7 +1,9 @@
-venv/
+dist/
 __pycache__/
 *.pyc
 .env
 *.key
 *.pub
+cosign.key
+cosign.pub
 .DS_Store

@@ -15,19 +15,19 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Ejecutar scanner del proyecto
+      - name: Ejecutar scanner simulado
         run: |
-          echo "[INFO] Ejecutando scanner desde workflow vulnerable"
-          python app/scanner.py README.md
+          echo "[INFO] Ejecutando scanner en workflow vulnerable"
+          go run ./cmd/trivy-lab samples/vulnerable.env
 
       - name: Verificar existencia de secret falso
         env:
           LAB_FAKE_TOKEN: ${{ secrets.LAB_FAKE_TOKEN }}
         run: |
-          echo "[INFO] Verificando si existe LAB_FAKE_TOKEN"
+          echo "[INFO] Verificando secret falso"
           if [ -n "$LAB_FAKE_TOKEN" ]; then
             echo "[RIESGO] El workflow tiene acceso a un secret."
-            echo "[INFO] Por seguridad, el valor real no será mostrado."
+            echo "[INFO] No se imprime el valor real."
           else
-            echo "[OK] No se encontró secret disponible."
+            echo "[OK] No hay secret disponible."
           fi

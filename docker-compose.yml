@@ -1,0 +1,14 @@
+services:
+  registry-web:
+    image: python:3.12-slim
+    container_name: trivy-lab-registry
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: sh -c "pip install -r web-registry/requirements.txt && python web-registry/app.py"
+    ports:
+      - "5000:5000"
+
+  trivy-lab:
+    build: .
+    container_name: trivy-lab-cli
