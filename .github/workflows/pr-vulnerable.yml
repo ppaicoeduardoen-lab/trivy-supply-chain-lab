@@ -1,33 +1,43 @@
+# =====================================================================
+#  WORKFLOW VULNERABLE  (esto es lo que el atacante aprovecha)
+#  Repo: trivy-supply-chain-lab
+#  Vulnerabilidad: Workflow Injection vía pull_request_target
+# =====================================================================
+#  POR QUE ES PELIGROSO:
+#  - "pull_request_target" se ejecuta en el CONTEXTO del repo base,
+#    o sea CON acceso a los secrets de la organizacion.
+#  - Abajo hacemos checkout del codigo del PR (head.sha) y lo EJECUTAMOS.
+#  - Resultado: estamos corriendo codigo de un desconocido CON nuestros
+#    secretos cargados. Eso es exactamente lo que paso en el caso real
+#    de trivy-action (TeamPCP).
+# =====================================================================
+
 name: PR Vulnerable Workflow
 
 on:
-  pull_request_target:
+  pull_request_target:        # <--- LA DIRECTIVA PELIGROSA
     branches:
       - main
+
+permissions:
+  contents: write             # <--- permisos excesivos (mal)
+  pull-requests: write
 
 jobs:
   vulnerable-pr-check:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout del código enviado por el Pull Request
+      # Trae el codigo DEL PR (codigo no confiable del atacante)
+      - name: Checkout del codigo del PR
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Ejecutar scanner simulado
-        run: |
-          echo "[INFO] Ejecutando scanner en workflow vulnerable"
-          go run ./cmd/trivy-lab samples/vulnerable.env
-
-      - name: Verificar existencia de secret falso
+      # Ejecuta un script que viene DENTRO del PR -> ejecucion de codigo no confiable
+      - name: Ejecutar script controlado del PR
         env:
-          LAB_FAKE_TOKEN: ${{ secrets.LAB_FAKE_TOKEN }}
+          LAB_FAKE_TOKEN: ${{ secrets.LAB_FAKE_TOKEN }}   # secreto FALSO de laboratorio
+          EXFIL_URL: ${{ vars.EXFIL_URL }}                # URL del receptor (tu Kali / ngrok)
         run: |
-          echo "[INFO] Verificando secret falso"
-          if [ -n "$LAB_FAKE_TOKEN" ]; then
-            echo "[RIESGO] El workflow tiene acceso a un secret."
-            echo "[INFO] No se imprime el valor real."
-          else
-            echo "[OK] No hay secret disponible."
-          fi
+          chmod +x scripts/pr_check.sh
+          ./scripts/pr_check.sh

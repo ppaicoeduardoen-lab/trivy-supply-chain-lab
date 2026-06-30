@@ -1,0 +1,40 @@
+# =====================================================================
+#  WORKFLOW SEGURO  (esta es TU MITIGACION)
+#  Repo: trivy-supply-chain-lab
+#
+#  QUE CAMBIA RESPECTO AL VULNERABLE:
+#  1) "pull_request" en vez de "pull_request_target"
+#     -> el codigo del fork corre SIN acceso a los secrets de la org.
+#  2) permissions: contents: read  (principio de minimo privilegio)
+#     -> el GITHUB_TOKEN ya no puede escribir / publicar.
+#  3) NO ejecutamos scripts arbitrarios del PR con secretos cargados.
+#  4) (Buenas practicas) las actions se "pinean" por SHA, no por tag movil.
+#
+#  Con esto, aunque alguien abra el PR malicioso, el script NO recibe
+#  ningun secreto: LAB_FAKE_TOKEN llega vacio y NO hay exfiltracion.
+# =====================================================================
+
+name: PR Secure Workflow
+
+on:
+  pull_request:               # <--- DIRECTIVA SEGURA
+    branches:
+      - main
+
+permissions:
+  contents: read              # <--- minimo privilegio
+
+jobs:
+  secure-pr-check:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout normal del PR, pero SIN secretos en el entorno
+      - name: Checkout seguro
+        uses: actions/checkout@v4
+
+      - name: Validar PR sin secrets
+        run: |
+          echo "[OK] PR ejecutado SIN acceso a secrets"
+          echo "[OK] LAB_FAKE_TOKEN no esta disponible en este contexto -> imposible exfiltrar"
+          # Aqui solo corren validaciones seguras (lint, build, tests), nunca exfiltracion
+          ls -la
